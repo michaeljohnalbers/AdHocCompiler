@@ -1,5 +1,8 @@
 
-SRCS := Scanner.cpp \
+SRCS := ASTNode.cpp \
+        ErrorWarningTracker.cpp \
+        Scanner.cpp \
+        Parser.cpp \
         Token.cpp \
         main.cpp
 

@@ -1,3 +1,4 @@
+
 #ifndef SCANNER_H
 #define SCANNER_H
 
@@ -16,9 +17,9 @@
 #include "Token.h"
 
 /**
- * Scans an input file returning all of the tokens contained therein. Use
- * getNextToken to find the next token in the file. Use getCurrentToken*
- * to retrieve information about the last scanned token.
+ * Scans an input file returning all of the tokens contained therein. It
+ * supports a one token look ahead feature (i.e., peeking).  Use nextToken to
+ * find the next token in the file. Use peek to return the look ahead token.
  */
 class Scanner
 {
@@ -48,7 +49,7 @@ class Scanner
    * @param theFile
    *          file to scan/tokenize
    * @throw std::runtime_error
-              on error opening input file
+   *          on error opening input file
    */
   Scanner(const std::string &theFile);
 
@@ -58,21 +59,40 @@ class Scanner
   ~Scanner() = default;
 
   /**
-   * Returns the last scanned token.
+   * Copy assignment operator
+   */
+  Scanner& operator=(const Scanner &) = default;
+
+  /**
+   * Move assignment operator
+   */
+  Scanner& operator=(Scanner &&) = default;
+
+  /**
+   * Returns the last scanned token. Will be EofSym until nextToken has been
+   * called.
    *
    * @return token from file
    */
   Token getCurrentToken() const;
 
   /**
-   * Find and return the next token in the file. Updates current token/token
-   * type.
+   * Find and return the next token in the file. Updates current token.
    *
    * @return next token
    * @throw std::runtime_error
    *          on syntax error
    */
-  Token getNextToken();
+  Token nextToken();
+
+  /**
+   * Returns the next token, but does not advance the token stream.
+   *
+   * @return next token
+   * @throw std::runtime_error
+   *          on syntax error
+   */
+  Token peek();
 
   // ************************************************************
   // Protected
@@ -83,6 +103,9 @@ class Scanner
   // Private
   // ************************************************************
   private:
+
+  /** Maximum number of characters in an identifier. */
+  static constexpr uint32_t MAX_ID_LENGTH = 32;
 
   /**
    * Adds the given character to the token buffer.
@@ -120,7 +143,7 @@ class Scanner
    *
    * @return current character
    */
-  char inspect();
+  char inspectCharacter();
 
   /**
    * Sets line/column counters when a newline is encountered.
@@ -132,7 +155,16 @@ class Scanner
    *
    * @return next charcter
    */
-  char read();
+  char readCharacter();
+
+  /**
+   * Reads and extracts the next token from the input file
+   *
+   * @return next token
+   * @throw std::runtime_error
+   *          on syntax error
+   */
+  Token readToken();
 
   /**
    * Throws an exception for a syntax error
@@ -154,6 +186,12 @@ class Scanner
   /** Last scanned token. */
   Token myCurrentToken;
 
+  /**
+   * Pointer to current token. Used to determine if peek token has
+   * been initialized.
+   */
+  Token *myCurrentTokenPtr = nullptr;
+
   /** Token literal being assembled */
   std::string myBuffer;
 
@@ -165,6 +203,15 @@ class Scanner
 
   /** Current line of input file */
   uint32_t myLine = 1;
+
+  /** Look ahead token. */
+  Token myPeekToken;
+
+  /**
+   * Pointer to look ahead token. Used to determine if peek token has
+   * been initialized.
+   */
+  Token *myPeekTokenPtr = nullptr;
 };
 
 #endif

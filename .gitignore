@@ -26,3 +26,10 @@
 *.exe
 *.out
 *.app
+MicroCompiler
+
+# Emacs backup files
+*~
+
+# Misc build artifacts
+.dependlist
