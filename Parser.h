@@ -9,6 +9,7 @@
  */
 
 #include <cstdint>
+#include <stack>
 
 #include "ASTNode.h"
 #include "Scanner.h"
@@ -96,7 +97,7 @@ class Parser
   void systemGoal();
 
   /*
-   * Helper functions
+   * Other functions
    */
 
   /**
@@ -115,9 +116,15 @@ class Parser
   void printParse(uint32_t theProduction, const char *theProductionName="")
     const noexcept;
 
+  /** Root node of abstract syntax tree. */
   ASTNode myASTRoot;
 
-  ASTNode *myASTCurrent = &myASTRoot;
+  /**
+   * Tracks parent nodes, top of stack is the parent for the current
+   * production. Each production function is responsible for calling 'pop'
+   * before returning.
+   */
+  std::stack<ASTNode*> myParentNode;
 
   /** Object to track and report errors and warnings */
   ErrorWarningTracker &myEWTracker;

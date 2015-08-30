@@ -33,3 +33,4 @@ MicroCompiler
 
 # Misc build artifacts
 .dependlist
+*.tar.gz

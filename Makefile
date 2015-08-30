@@ -32,7 +32,7 @@ $(EXE): $(OBJS)
 .PHONY: clean
 clean:
 	@echo "Cleaning $(EXE)"
-	@$(RM) $(OBJS) $(EXE) $(DEPEND_FILE)
+	@$(RM) $(OBJS) $(EXE) $(DEPEND_FILE) *~
 
 .PHONY: depend
 depend:

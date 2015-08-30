@@ -28,7 +28,9 @@ Parser::Parser(Scanner &theScanner,
 //**************
 void Parser::parse()
 {
+  myParentNode.push(&myASTRoot);
   systemGoal();
+  myParentNode.pop();
 }
 
 //**************
@@ -40,21 +42,23 @@ void Parser::addOp()
   switch (peekToken.getToken())
   {
     case Token::Type::PlusOp:
-      match(Token::Type::PlusOp);
-      myASTCurrent->addChild(new ASTNode{myScanner.getCurrentToken()});
+      myParentNode.top()->addChild(peekToken);
       printParse(12);
+      match(Token::Type::PlusOp);
       break;
 
     case Token::Type::MinusOp:
-      match(Token::Type::MinusOp);
-      myASTCurrent->addChild(new ASTNode{myScanner.getCurrentToken()});
+      myParentNode.top()->addChild(peekToken);
       printParse(13);
+      match(Token::Type::MinusOp);
       break;
 
     default:
-      // TODO: syntax error
+      myEWTracker.reportError(peekToken, 2,
+                              Token::Type::PlusOp, Token::Type::MinusOp);
       break;
   }
+  myParentNode.pop();
 }
 
 //*******************
@@ -62,28 +66,26 @@ void Parser::addOp()
 //*******************
 void Parser::expression()
 {
-  auto newNode = new ASTNode{"<primary>"};
-  myASTCurrent->addChild(newNode);
-  auto savedCurrent = myASTCurrent;
-  myASTCurrent = newNode;
+  auto primaryNode = myParentNode.top()->addChild("<primary>");
   printParse(8);
 
+  myParentNode.push(primaryNode);
   primary();
-  myASTCurrent = savedCurrent;
+
   Token peekToken(myScanner.peek());
   if (peekToken.getToken() == Token::Type::PlusOp ||
       peekToken.getToken() == Token::Type::MinusOp)
   {
-    auto addNode = new ASTNode{"<add op>"};
-    myASTCurrent->addChild(addNode);
-    auto exprNode = new ASTNode{"<expression>"};
-    myASTCurrent->addChild(exprNode);
+    auto addNode = myParentNode.top()->addChild("<add op>");
+    auto expressionNode = myParentNode.top()->addChild("<expression>");
     printParse(8);
-    myASTCurrent = addNode;
+
+    myParentNode.push(addNode);
     addOp();
-    myASTCurrent = exprNode;
+    myParentNode.push(expressionNode);
     expression();
   }
+  myParentNode.pop();
 }
 
 //*****************
@@ -91,13 +93,24 @@ void Parser::expression()
 //*****************
 void Parser::exprList()
 {
+  auto expressionNode = myParentNode.top()->addChild("<expression>");
+  printParse(7);
+
+  myParentNode.push(expressionNode);
   expression();
+
   Token peekToken(myScanner.peek());
   if (peekToken.getToken() == Token::Type::Comma)
   {
+    myParentNode.top()->addChild(",");
+    auto exprListNode = myParentNode.top()->addChild("<exprList>");
+    myParentNode.push(exprListNode);
+    printParse(7);
+
     match(Token::Type::Comma);
     exprList();
   }
+  myParentNode.pop();
 }
 
 //**************
@@ -107,8 +120,9 @@ void Parser::ident()
 {
   match(Token::Type::Id);
 
-  myASTCurrent->addChild(new ASTNode{myScanner.getCurrentToken()});
+  myParentNode.top()->addChild(new ASTNode{myScanner.getCurrentToken()});
   printParse(10);
+  myParentNode.pop();
 }
 
 //***************
@@ -116,24 +130,24 @@ void Parser::ident()
 //***************
 void Parser::idList()
 {
-  auto newNode = new ASTNode("<ident>");
-  myASTCurrent->addChild(newNode);
-  myASTCurrent = newNode;
+  auto identNode = myParentNode.top()->addChild("<ident>");
   printParse(6);
 
+  myParentNode.push(identNode);
   ident();
+
   Token peekToken(myScanner.peek());
   if (peekToken.getToken() == Token::Type::Comma)
   {
-    myASTCurrent->addChild(new ASTNode(","));
-    auto newNode = new ASTNode("<idList>");
-    myASTCurrent->addChild(newNode);
-    myASTCurrent = newNode;
+    myParentNode.top()->addChild(",");
+    auto idListNode = myParentNode.top()->addChild("<idList>");
     printParse(6);
 
+    myParentNode.push(idListNode);
     match(Token::Type::Comma);
     idList();
   }
+  myParentNode.pop();
 }
 
 //****************
@@ -142,39 +156,45 @@ void Parser::idList()
 void Parser::primary()
 {
   Token peekToken(myScanner.peek());
-  switch(peekToken.getToken())
+  switch (peekToken.getToken())
   {
     case Token::Type::LParen:
     {
-      auto savedCurrent = myASTCurrent;
-      myASTCurrent->addChild(new ASTNode("("));
-      auto exprNode = new ASTNode{"<expression>"};
-      myASTCurrent->addChild(exprNode);
-      myASTCurrent->addChild(new ASTNode{")"});
+      myParentNode.top()->addChild("(");
+      auto expressionNode = myParentNode.top()->addChild("<expression>");
+      myParentNode.top()->addChild(")");
       printParse(9);
 
+      myParentNode.push(expressionNode);
       match(Token::Type::LParen);
-      myASTCurrent = exprNode;
       expression();
       match(Token::Type::RParen);
-      myASTCurrent = savedCurrent;
     }
     break;
 
     case Token::Type::Id:
+    {
+      auto identNode = myParentNode.top()->addChild("<ident>");
+      printParse(9);
+      myParentNode.push(identNode);
       ident();
-      break;
+    }
+    break;
 
     case Token::Type::IntLiteral:
-      myASTCurrent->addChild(new ASTNode(peekToken));
+    {
+      myParentNode.top()->addChild(new ASTNode(peekToken));
       printParse(11);
       match(Token::Type::IntLiteral);
-      break;
+    }
+    break;
 
     default:
-      // TODO: syntax error
+      myEWTracker.reportError(peekToken, 3, Token::Type::LParen,
+                              Token::Type::Id, Token::Type::IntLiteral);
       break;
   }
+  myParentNode.pop();
 }
 
 //****************
@@ -182,16 +202,17 @@ void Parser::primary()
 //****************
 void Parser::program()
 {
-  myASTCurrent->addChild(new ASTNode("begin"));
-  auto newNode = new ASTNode("<statement list>");
-  myASTCurrent->addChild(newNode);
-  myASTCurrent->addChild(new ASTNode("end"));
-  myASTCurrent = newNode;
+  myParentNode.top()->addChild("begin");
+  auto statementListNode = myParentNode.top()->addChild("<statement list>");
+  myParentNode.top()->addChild("end");
   printParse(1);
 
+  myParentNode.push(statementListNode);
   match(Token::Type::BeginSym);
   statementList();
   match(Token::Type::EndSym);
+
+  myParentNode.pop();
 }
 
 
@@ -205,18 +226,16 @@ void Parser::statement()
   {
     case Token::Type::Id:
     {
-      auto newNode1 = new ASTNode("<ident>");
-      myASTCurrent->addChild(newNode1);
-      myASTCurrent->addChild(new ASTNode(":="));
-      auto newNode2 = new ASTNode("<expression>");
-      myASTCurrent->addChild(newNode2);
-      myASTCurrent->addChild(new ASTNode(";"));
-      myASTCurrent = newNode1;
+      auto identNode = myParentNode.top()->addChild("<ident>");
+      myParentNode.top()->addChild(":=");
+      auto expressionNode = myParentNode.top()->addChild("<expression>");
+      myParentNode.top()->addChild(";");
       printParse(3);
 
+      myParentNode.push(identNode);
       ident();
       match(Token::Type::AssignOp);
-      myASTCurrent = newNode2;
+      myParentNode.push(expressionNode);
       expression();
       match(Token::Type::SemiColon);
     }
@@ -224,15 +243,14 @@ void Parser::statement()
 
     case Token::Type::ReadSym:
     {
-      myASTCurrent->addChild(new ASTNode("Read"));
-      myASTCurrent->addChild(new ASTNode("("));
-      auto newNode = new ASTNode("<idList>");
-      myASTCurrent->addChild(newNode);
-      myASTCurrent->addChild(new ASTNode(")"));
-      myASTCurrent->addChild(new ASTNode(";"));
-      myASTCurrent = newNode;
+      myParentNode.top()->addChild("Read");
+      myParentNode.top()->addChild("(");
+      auto idListNode = myParentNode.top()->addChild("<idList>");
+      myParentNode.top()->addChild(")");
+      myParentNode.top()->addChild(";");
       printParse(4);
 
+      myParentNode.push(idListNode);
       match(Token::Type::ReadSym);
       match(Token::Type::LParen);
       idList();
@@ -243,15 +261,14 @@ void Parser::statement()
 
     case Token::Type::WriteSym:
     {
-      myASTCurrent->addChild(new ASTNode("Write"));
-      myASTCurrent->addChild(new ASTNode("("));
-      auto newNode = new ASTNode("<exprList>");
-      myASTCurrent->addChild(newNode);
-      myASTCurrent->addChild(new ASTNode(")"));
-      myASTCurrent->addChild(new ASTNode(";"));
-      myASTCurrent = newNode;
+      myParentNode.top()->addChild("Write");
+      myParentNode.top()->addChild("(");
+      auto exprListNode = myParentNode.top()->addChild("<exprList>");
+      myParentNode.top()->addChild(")");
+      myParentNode.top()->addChild(";");
       printParse(5);
 
+      myParentNode.push(exprListNode);
       match(Token::Type::WriteSym);
       match(Token::Type::LParen);
       exprList();
@@ -261,14 +278,11 @@ void Parser::statement()
     break;
 
     default:
-    {
-      std::string error{"Expected "};
-      error += "Id or WriteSym or ReadSym, instead found " +
-        peekToken.getTokenString() + ".";
-      myEWTracker.reportError(peekToken, error);
-    }
+      myEWTracker.reportError(peekToken, 3, Token::Type::Id,
+                              Token::Type::ReadSym, Token::Type::WriteSym);
     break;
-  }  
+  }
+  myParentNode.pop();
 }
 
 //**********************
@@ -276,13 +290,10 @@ void Parser::statement()
 //**********************
 void Parser::statementList()
 {
-  auto newNode = new ASTNode("<statement>");
-  myASTCurrent->addChild(newNode);
-  myASTCurrent = newNode;
-  auto savedCurrent = myASTCurrent;
-
+  auto statementNode = myParentNode.top()->addChild("<statement>");
   printParse(2);
 
+  myParentNode.push(statementNode);
   statement();
 
   Token peekToken(myScanner.peek());
@@ -291,18 +302,20 @@ void Parser::statementList()
     case Token::Type::Id:
     case Token::Type::ReadSym:
     case Token::Type::WriteSym:
-      // TOOD: needs work
-      newNode = new ASTNode("<statement list>");
-      savedCurrent->addChild(newNode);
+    {
+      auto statmentListNode = myParentNode.top()->addChild("<statement list>");
       printParse(2);
-      myASTCurrent = newNode;
 
+      myParentNode.push(statmentListNode);
       statementList();
-      break;
+    }
+    break;
 
     default:
+      // Nothing to do here. Default needed to suppress warning.
       break;
   }
+  myParentNode.pop();
 }
 
 //*******************
@@ -310,16 +323,16 @@ void Parser::statementList()
 //*******************
 void Parser::systemGoal()
 {
-  auto newNode = new ASTNode{"<program>"};
-  myASTCurrent->addChild(newNode);
-  myASTCurrent->addChild(new ASTNode{"$"});
+  auto programNode = myParentNode.top()->addChild("<program>");
+  myParentNode.top()->addChild("$");
 
   printParse(14, "<system goal>");
 
-  myASTCurrent = newNode;
-
+  myParentNode.push(programNode);
   program();
   match(Token::Type::EofSym);
+
+  myParentNode.pop();
 }
 
 //**************
@@ -330,11 +343,7 @@ void Parser::match(const Token::Type &theToken) noexcept
   Token nextToken = myScanner.nextToken();
   if (nextToken.getToken() != theToken)
   {
-    Token dummyToken{theToken, 0, 0};
-    std::string error{"Expected "};
-    error += dummyToken.getTokenString() + ", instead found " +
-      nextToken.getTokenString() + ".";
-    myEWTracker.reportError(nextToken, error);
+    myEWTracker.reportError(nextToken, 1, theToken);
   }
 }
 

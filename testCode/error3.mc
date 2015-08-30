@@ -1,0 +1,3 @@
+begin
+_invalidIdentifier
+end

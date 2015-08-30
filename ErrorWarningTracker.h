@@ -10,8 +10,12 @@
 
 #include <string>
 
-class Token;
+#include "Token.h"
 
+/**
+ * This class handles compiler errors and warnings. It should be used to report
+ * all errors and warnings encountered during compilation.
+ */
 class ErrorWarningTracker
 {
   // ************************************************************
@@ -70,6 +74,24 @@ class ErrorWarningTracker
    *          error to report
    */
   void reportError(Token &theErrorToken, const std::string &theError) noexcept;
+
+  /**
+   * Reports a syntax error that the expected token was not read and lists
+   * the possible legal token(s). This function is really a convenience
+   * wrapper around the other reportError.
+   *
+   * @param theErrorToken
+   *          token on which the error occurred
+   * @param theNumberExpected
+   *          number of variable arguments
+   * @param ...
+   *          variable number of Token::Type values. These are the legal
+   *          tokens which were expected.  Number given must match the value
+   *          passed as theNumberExpected
+   */
+  void reportError(Token &theErrorToken,
+                   uint32_t theNumberExpected,
+                   ...);
 
   /**
    * Reports a warning.

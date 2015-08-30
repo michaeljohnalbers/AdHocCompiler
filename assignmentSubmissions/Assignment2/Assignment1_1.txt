@@ -1,0 +1,95 @@
+<system goal> 14 --> <program> $ 
+               1 --> begin <statement list> end $ 
+               2 --> begin <statement> end $ 
+               4 --> begin Read ( <idList> ) ; end $ 
+               6 --> begin Read ( <ident> ) ; end $ 
+              10 --> begin Read ( Id ) ; end $ 
+               6 --> begin Read ( Id , <idList> ) ; end $ 
+               6 --> begin Read ( Id , <ident> ) ; end $ 
+              10 --> begin Read ( Id , Id ) ; end $ 
+               6 --> begin Read ( Id , Id , <idList> ) ; end $ 
+               6 --> begin Read ( Id , Id , <ident> ) ; end $ 
+              10 --> begin Read ( Id , Id , Id ) ; end $ 
+               6 --> begin Read ( Id , Id , Id , <idList> ) ; end $ 
+               6 --> begin Read ( Id , Id , Id , <ident> ) ; end $ 
+              10 --> begin Read ( Id , Id , Id , Id ) ; end $ 
+               2 --> begin Read ( Id , Id , Id , Id ) ; <statement list> end $ 
+               2 --> begin Read ( Id , Id , Id , Id ) ; <statement> end $ 
+               3 --> begin Read ( Id , Id , Id , Id ) ; <ident> := <expression> ; end $ 
+              10 --> begin Read ( Id , Id , Id , Id ) ; Id := <expression> ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := <primary> ; end $ 
+               9 --> begin Read ( Id , Id , Id , Id ) ; Id := <ident> ; end $ 
+              10 --> begin Read ( Id , Id , Id , Id ) ; Id := Id ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id <add op> <expression> ; end $ 
+              12 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp <expression> ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp <primary> ; end $ 
+               9 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( <expression> ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( <primary> ) ; end $ 
+               9 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( <ident> ) ; end $ 
+              10 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id <add op> <expression> ) ; end $ 
+              13 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp <expression> ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp <primary> ) ; end $ 
+               9 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp <ident> ) ; end $ 
+              10 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) <add op> <expression> ; end $ 
+              13 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp <expression> ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp <primary> ; end $ 
+              11 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; end $ 
+               2 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; <statement list> end $ 
+               2 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; <statement> end $ 
+               3 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; <ident> := <expression> ; end $ 
+              10 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := <expression> ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := <primary> ; end $ 
+               9 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( <expression> ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( <primary> ) ; end $ 
+               9 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( <expression> ) ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( <primary> ) ) ; end $ 
+               9 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( <ident> ) ) ; end $ 
+              10 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id ) ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id <add op> <expression> ) ) ; end $ 
+              13 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp <expression> ) ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp <primary> ) ) ; end $ 
+               9 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( <expression> ) ) ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( <primary> ) ) ) ; end $ 
+              11 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) ) ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) <add op> <expression> ) ) ; end $ 
+              12 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp <expression> ) ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp <primary> ) ) ; end $ 
+               9 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( <expression> ) ) ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( <primary> ) ) ) ; end $ 
+               9 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( <ident> ) ) ) ; end $ 
+              10 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id ) ) ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id <add op> <expression> ) ) ) ; end $ 
+              12 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp <expression> ) ) ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp <primary> ) ) ) ; end $ 
+               9 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp <ident> ) ) ) ; end $ 
+              10 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) <add op> <expression> ; end $ 
+              13 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp <expression> ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp <primary> ; end $ 
+               9 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( <expression> ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( <primary> ) ; end $ 
+              11 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral <add op> <expression> ) ; end $ 
+              13 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp <expression> ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp <primary> ) ; end $ 
+               9 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp <ident> ) ; end $ 
+              10 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; end $ 
+               2 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; <statement list> end $ 
+               2 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; <statement> end $ 
+               5 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; Write ( <exprList> ) ; end $ 
+               7 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; Write ( <expression> ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; Write ( <primary> ) ; end $ 
+               9 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; Write ( <ident> ) ; end $ 
+              10 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; Write ( Id ) ; end $ 
+               7 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; Write ( Id , <exprList> ) ; end $ 
+               7 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; Write ( Id , <expression> ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; Write ( Id , <primary> ) ; end $ 
+               9 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; Write ( Id , <ident> ) ; end $ 
+              10 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; Write ( Id , Id ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; Write ( Id , Id <add op> <expression> ) ; end $ 
+              12 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; Write ( Id , Id PlusOp <expression> ) ; end $ 
+               8 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; Write ( Id , Id PlusOp <primary> ) ; end $ 
+               9 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; Write ( Id , Id PlusOp <ident> ) ; end $ 
+              10 --> begin Read ( Id , Id , Id , Id ) ; Id := Id PlusOp ( Id MinusOp Id ) MinusOp IntLiteral ; Id := ( ( Id MinusOp ( IntLiteral ) PlusOp ( Id PlusOp Id ) ) ) MinusOp ( IntLiteral MinusOp Id ) ; Write ( Id , Id PlusOp Id ) ; end $ 

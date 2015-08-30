@@ -11,8 +11,8 @@
 //*****************
 // ASTNode::ASTNode
 //*****************
-ASTNode::ASTNode(const std::string &theNonTerminal) :
-  myNonTerminal{new std::string{theNonTerminal}},
+ASTNode::ASTNode(const std::string &theNodeText) :
+  myNodeText{new std::string{theNodeText}},
   myParent(nullptr)
 {
 }
@@ -23,6 +23,26 @@ ASTNode::ASTNode(const std::string &theNonTerminal) :
 ASTNode::ASTNode(const Token &theToken) :
   myToken{new Token{theToken}}
 {
+}
+
+//******************
+// ASTNode::addChild
+//******************
+ASTNode* ASTNode::addChild(const std::string &theNodeText)
+{
+  auto newNode = new ASTNode(theNodeText);
+  addChild(newNode);
+  return newNode;
+}
+
+//******************
+// ASTNode::addChild
+//******************
+ASTNode* ASTNode::addChild(const Token &theToken)
+{
+  auto newNode = new ASTNode(theToken);
+  addChild(newNode);
+  return newNode;
 }
 
 //******************
@@ -63,7 +83,7 @@ void ASTNode::traverse(std::ostream &theOS) const noexcept
     }
     else
     {
-      theOS << *myNonTerminal;
+      theOS << *myNodeText;
     }
     theOS << " ";
   }
