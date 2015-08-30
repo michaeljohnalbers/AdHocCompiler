@@ -1,0 +1,11 @@
+<system goal> 14 --> <program> $ 
+               1 --> begin <statement list> end $ 
+               2 --> begin <statement> end $ 
+               4 --> begin Read ( <idList> ) ; end $ 
+               6 --> begin Read ( <ident> ) ; end $ 
+testCode/Assignment1_2.mc:4:8: error: Expected Id. Instead found RParen.
+              10 --> begin Read ( RParen ) ; end $ 
+testCode/Assignment1_2.mc:4:9: error: Expected RParen. Instead found SemiColon.
+testCode/Assignment1_2.mc:5:3: error: Expected SemiColon. Instead found Id.
+testCode/Assignment1_2.mc:5:19: error: Expected EndSym. Instead found AssignOp.
+testCode/Assignment1_2.mc:5:22: error: Expected EofSym. Instead found IntLiteral.

@@ -9,8 +9,8 @@
 #include <cctype>
 #include <cerrno>
 #include <cstring>
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
 
 #include "Scanner.h"
 
@@ -37,29 +37,13 @@ Scanner::Scanner(const std::string &theFile) :
   }
 }
 
-//******************************
-// Scanner::addCharacterToBuffer
-//******************************
-void Scanner::addCharacterToBuffer(char theCharacter)
-{
-  myBuffer += theCharacter;
-}
-
-//*********************
-// Scanner::clearBuffer
-//*********************
+//*****************
+// Scanner::advance
+//*****************
 void Scanner::advance()
 {
   myInputStream.get();
   ++myColumn;
-}
-
-//*********************
-// Scanner::clearBuffer
-//*********************
-void Scanner::clearBuffer()
-{
-  myBuffer.clear();
 }
 
 //*************************
@@ -67,186 +51,6 @@ void Scanner::clearBuffer()
 //*************************
 Token Scanner::getCurrentToken() const
 {
-  return myCurrentToken;
-}
-
-//**********************
-// Scanner::getNextToken
-//**********************
-Token Scanner::getNextToken()
-{
-  clearBuffer();
-
-  while (true)
-  {
-    char currentChar = read();
-    if (! myInputStream.eof())
-    {
-      // Start of (potential) new token
-
-      uint32_t tokenStartColumn = myColumn;
-
-      if (std::isspace(currentChar))
-      {
-        if ('\n' == currentChar)
-        {
-          newLine();
-        }
-      }
-      else if (std::isalpha(currentChar))
-      {
-        addCharacterToBuffer(currentChar);
-        while (true)
-        {
-          currentChar = inspect();
-          if (std::isalnum(currentChar) || '_' == currentChar)
-          {
-            addCharacterToBuffer(currentChar);
-            advance();
-          }
-          else
-          {
-            myCurrentToken = idOrReserved(myBuffer, tokenStartColumn);
-            auto tokenLength = myCurrentToken.getLiteral().size();
-            if (Token::Type::Id == myCurrentToken.getToken() &&
-                tokenLength > 32)
-            {
-              syntaxError("Invalid length of " +
-                          std::to_string(tokenLength) +
-                          " characters for identifier '" +
-                          myCurrentToken.getLiteral() +
-                          "'. Identifiers can be at most 32 characters.");
-            }
-
-            return myCurrentToken;
-          }
-        }
-      }
-      else if (std::isdigit(currentChar))
-      {
-        addCharacterToBuffer(currentChar);
-        while (true)
-        {
-          currentChar = inspect();
-          if (std::isdigit(currentChar))
-          {
-            addCharacterToBuffer(currentChar);
-            advance();
-          }
-          else
-          {
-            myCurrentToken = Token(
-              Token::Type::IntLiteral, myBuffer, myLine, tokenStartColumn);
-            return myCurrentToken;
-          }
-        }
-      }
-      else if ('(' == currentChar)
-      {
-        addCharacterToBuffer(currentChar);
-        myCurrentToken = Token(Token::Type::LParen, myBuffer, myLine, tokenStartColumn);
-        return myCurrentToken;
-      }
-      else if (')' == currentChar)
-      {
-        addCharacterToBuffer(currentChar);
-        myCurrentToken = Token(Token::Type::RParen, myBuffer, myLine, tokenStartColumn);
-        return myCurrentToken;
-      }
-      else if (';' == currentChar)
-      {
-        addCharacterToBuffer(currentChar);
-        myCurrentToken = Token(Token::Type::SemiColon, myBuffer, myLine, tokenStartColumn);
-        return myCurrentToken;
-      }
-      else if (',' == currentChar)
-      {
-        addCharacterToBuffer(currentChar);
-        myCurrentToken = Token(Token::Type::Comma, myBuffer, myLine, tokenStartColumn);
-        return myCurrentToken;
-      }
-      else if ('+' == currentChar)
-      {
-        addCharacterToBuffer(currentChar);
-        myCurrentToken = Token(Token::Type::PlusOp, myBuffer, myLine, tokenStartColumn);
-        return myCurrentToken;
-      }
-      else if ('=' == currentChar)
-      {
-        addCharacterToBuffer(currentChar);
-        myCurrentToken = Token(Token::Type::EqualOp, myBuffer, myLine, tokenStartColumn);
-        return myCurrentToken;
-      }
-      else if ('*' == currentChar)
-      {
-        addCharacterToBuffer(currentChar);
-        currentChar = inspect();
-        if ('*' == currentChar)
-        {
-          addCharacterToBuffer(currentChar);
-          advance();
-          myCurrentToken = Token(Token::Type::ExponentOp, myBuffer, myLine, tokenStartColumn);
-          return myCurrentToken;
-        }
-        else
-        {
-          std::string error {"Expected '*' after '*'. Instead found '"};
-          error += currentChar + std::string{"'."};
-          syntaxError(error);
-        }
-      }
-      else if (':' == currentChar)
-      {
-        addCharacterToBuffer(currentChar);
-        currentChar = inspect();
-        if ('=' == currentChar)
-        {
-          addCharacterToBuffer(currentChar);
-          advance();
-          myCurrentToken = Token(Token::Type::AssignOp, myBuffer, myLine, tokenStartColumn);
-          return myCurrentToken;
-        }
-        else
-        {
-          std::string error {"Expected '=' after ':'. Instead found '"};
-          error += currentChar + std::string{"'."};
-          syntaxError(error);
-        }
-      }
-      else if ('-' == currentChar)
-      {
-        char nextChar = inspect();
-        if ('-' == nextChar)
-        {
-          // Comment, read past it.
-          currentChar = nextChar;
-          while (currentChar != '\n')
-          {
-            currentChar = read();
-          }
-          newLine();
-        }
-        else
-        {
-          addCharacterToBuffer(currentChar);
-          myCurrentToken = Token(Token::Type::MinusOp, myBuffer, myLine, tokenStartColumn);
-          return myCurrentToken;
-        }
-      }
-      else
-      {
-        std::string error{"Read unexpected character '"};
-        error += currentChar + std::string("' (ASCII decimal ") +
-          std::to_string(currentChar) + ").";
-        syntaxError(error);
-      }
-    }
-    else
-    {
-      myCurrentToken = Token(Token::Type::EofSym, myLine, 0);
-      break;
-    }
-  }
   return myCurrentToken;
 }
 
@@ -272,10 +76,10 @@ Token Scanner::idOrReserved(const std::string &theTokenLiteral,
   return idOrReserved;
 }
 
-//*****************
-// Scanner::inspect
-//*****************
-char Scanner::inspect()
+//**************************
+// Scanner::inspectCharacter
+//**************************
+char Scanner::inspectCharacter()
 {
   return myInputStream.peek();
 }
@@ -289,14 +93,233 @@ void Scanner::newLine()
   myColumn = 0;
 }
 
-//**************
-// Scanner::read
-//**************
-char Scanner::read()
+//*******************
+// Scanner::nextToken
+//*******************
+Token Scanner::nextToken()
 {
-  auto character = inspect();
+  myCurrentToken = peek();
+  myPeekToken = readToken();
+  return myCurrentToken;
+}
+
+//**************
+// Scanner::peek
+//**************
+Token Scanner::peek()
+{
+  if (nullptr == myPeekTokenPtr)
+  {
+    myPeekToken = readToken();
+    myPeekTokenPtr = &myPeekToken;
+  }
+  return *myPeekTokenPtr;
+}
+
+//***********************
+// Scanner::readCharacter
+//***********************
+char Scanner::readCharacter()
+{
+  auto character = inspectCharacter();
   advance();
   return character;
+}
+
+//*******************
+// Scanner::readToken
+//*******************
+Token Scanner::readToken()
+{
+  std::string thisBuffer;
+
+  auto addCharacterToBuffer = [&](char theCharacter)
+  {
+    thisBuffer += theCharacter;
+  };
+
+  Token nextToken;
+  while (true)
+  {
+    char currentChar = readCharacter();
+    if (! myInputStream.eof())
+    {
+      // Start of (potential) new token
+
+      uint32_t tokenStartColumn = myColumn;
+
+      if (std::isspace(currentChar))
+      {
+        if ('\n' == currentChar)
+        {
+          newLine();
+        }
+      }
+      else if (std::isalpha(currentChar))
+      {
+        addCharacterToBuffer(currentChar);
+        while (true)
+        {
+          currentChar = inspectCharacter();
+          if (std::isalnum(currentChar) || '_' == currentChar)
+          {
+            addCharacterToBuffer(currentChar);
+            advance();
+          }
+          else
+          {
+            nextToken = idOrReserved(thisBuffer, tokenStartColumn);
+            auto tokenLength = nextToken.getLiteral().size();
+            if (Token::Type::Id == nextToken.getToken() &&
+                tokenLength > MAX_ID_LENGTH)
+            {
+              syntaxError("Invalid length of " +
+                          std::to_string(tokenLength) +
+                          " characters for identifier '" +
+                          nextToken.getLiteral() +
+                          "'. Identifiers can be at most " +
+                          std::to_string(MAX_ID_LENGTH) + " characters.");
+            }
+
+            return nextToken;
+          }
+        }
+      }
+      else if (std::isdigit(currentChar))
+      {
+        addCharacterToBuffer(currentChar);
+        while (true)
+        {
+          currentChar = inspectCharacter();
+          if (std::isdigit(currentChar))
+          {
+            addCharacterToBuffer(currentChar);
+            advance();
+          }
+          else
+          {
+            nextToken = Token(Token::Type::IntLiteral, thisBuffer,
+                              myLine, tokenStartColumn);
+            return nextToken;
+          }
+        }
+      }
+      else if ('(' == currentChar)
+      {
+        addCharacterToBuffer(currentChar);
+        nextToken = Token(Token::Type::LParen, thisBuffer,
+                          myLine, tokenStartColumn);
+        return nextToken;
+      }
+      else if (')' == currentChar)
+      {
+        addCharacterToBuffer(currentChar);
+        nextToken = Token(Token::Type::RParen, thisBuffer,
+                          myLine, tokenStartColumn);
+        return nextToken;
+      }
+      else if (';' == currentChar)
+      {
+        addCharacterToBuffer(currentChar);
+        nextToken = Token(Token::Type::SemiColon, thisBuffer,
+                          myLine, tokenStartColumn);
+        return nextToken;
+      }
+      else if (',' == currentChar)
+      {
+        addCharacterToBuffer(currentChar);
+        nextToken = Token(Token::Type::Comma, thisBuffer,
+                          myLine, tokenStartColumn);
+        return nextToken;
+      }
+      else if ('+' == currentChar)
+      {
+        addCharacterToBuffer(currentChar);
+        nextToken = Token(Token::Type::PlusOp, thisBuffer,
+                          myLine, tokenStartColumn);
+        return nextToken;
+      }
+      else if ('=' == currentChar)
+      {
+        addCharacterToBuffer(currentChar);
+        nextToken = Token(Token::Type::EqualOp, thisBuffer,
+                          myLine, tokenStartColumn);
+        return nextToken;
+      }
+      else if ('*' == currentChar)
+      {
+        addCharacterToBuffer(currentChar);
+        currentChar = inspectCharacter();
+        if ('*' == currentChar)
+        {
+          addCharacterToBuffer(currentChar);
+          advance();
+          nextToken = Token(Token::Type::ExponentOp, thisBuffer,
+                            myLine, tokenStartColumn);
+          return nextToken;
+        }
+        else
+        {
+          std::string error {"Expected '*' after '*'. Instead found '"};
+          error += currentChar + std::string{"'."};
+          syntaxError(error);
+        }
+      }
+      else if (':' == currentChar)
+      {
+        addCharacterToBuffer(currentChar);
+        currentChar = inspectCharacter();
+        if ('=' == currentChar)
+        {
+          addCharacterToBuffer(currentChar);
+          advance();
+          nextToken = Token(Token::Type::AssignOp, thisBuffer,
+                            myLine, tokenStartColumn);
+          return nextToken;
+        }
+        else
+        {
+          std::string error {"Expected '=' after ':'. Instead found '"};
+          error += currentChar + std::string{"'."};
+          syntaxError(error);
+        }
+      }
+      else if ('-' == currentChar)
+      {
+        char nextChar = inspectCharacter();
+        if ('-' == nextChar)
+        {
+          // Comment, read past it.
+          currentChar = nextChar;
+          while (currentChar != '\n')
+          {
+            currentChar = readCharacter();
+          }
+          newLine();
+        }
+        else
+        {
+          addCharacterToBuffer(currentChar);
+          nextToken = Token(Token::Type::MinusOp, thisBuffer,
+                            myLine, tokenStartColumn);
+          return nextToken;
+        }
+      }
+      else
+      {
+        std::string error{"Read unexpected character '"};
+        error += currentChar + std::string("' (ASCII decimal ") +
+          std::to_string(currentChar) + ").";
+        syntaxError(error);
+      }
+    }
+    else
+    {
+      nextToken = Token(Token::Type::EofSym, myLine, 0);
+      break;
+    }
+  }
+  return nextToken;
 }
 
 //*********************

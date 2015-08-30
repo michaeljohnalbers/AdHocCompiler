@@ -7,7 +7,9 @@
 
 #include <iostream>
 
+#include "ErrorWarningTracker.h"
 #include "Scanner.h"
+#include "Parser.h"
 
 int main(int argc, char **argv)
 {
@@ -18,16 +20,13 @@ int main(int argc, char **argv)
       throw std::runtime_error("No input file provided.");
     }
 
-    Scanner scanner(argv[1]);
-    while (true)
-    {
-      Token nextToken = scanner.getNextToken();
-      std::cout << "Token: " << nextToken << std::endl;
-      if (nextToken.getToken() == Token::Type::EofSym)
-      {
-        break;
-      }
-    }
+    std::string file(argv[1]);
+
+    ErrorWarningTracker ewTracker(file);
+
+    Scanner scanner(file);
+    Parser parser(scanner, ewTracker);
+    parser.parse();
   }
   catch (const std::exception &exception)
   {

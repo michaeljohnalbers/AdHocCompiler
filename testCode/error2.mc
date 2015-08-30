@@ -1,0 +1,3 @@
+begin
+  $ -- Unrecognized character
+end
