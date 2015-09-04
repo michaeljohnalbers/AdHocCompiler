@@ -10,14 +10,18 @@
 #include <sstream>
 
 #include "ErrorWarningTracker.h"
+#include "ExpressionRecord.h"
+#include "OperatorRecord.h"
 #include "Parser.h"
 
 //***************
 // Parser::Parser
 //***************
 Parser::Parser(Scanner &theScanner,
+               CodeGenerator &theGenerator,
                ErrorWarningTracker &theEWTracker) :
-  myASTRoot(std::string("<system goal>")),
+  myASTRoot{std::string("<system goal>")},
+  myGenerator{theGenerator},
   myEWTracker{theEWTracker},
   myScanner{theScanner}
 {
@@ -36,8 +40,10 @@ void Parser::parse()
 //**************
 // Parser::addOp
 //**************
-void Parser::addOp()
+void Parser::addOp(OperatorRecord &theOperator)
 {
+  printFunction("addOp");
+
   Token peekToken(myScanner.peek());
   switch (peekToken.getToken())
   {
@@ -45,12 +51,16 @@ void Parser::addOp()
       myParentNode.top()->addChild(peekToken);
       printParse(12);
       match(Token::Type::PlusOp);
+      theOperator = myGenerator.processOperator(
+        myScanner.getCurrentToken().getLiteral());
       break;
 
     case Token::Type::MinusOp:
       myParentNode.top()->addChild(peekToken);
       printParse(13);
       match(Token::Type::MinusOp);
+      theOperator = myGenerator.processOperator(
+        myScanner.getCurrentToken().getLiteral());
       break;
 
     default:
@@ -64,13 +74,21 @@ void Parser::addOp()
 //*******************
 // Parser::expression
 //*******************
-void Parser::expression()
+void Parser::expression(ExpressionRecord &theExpression)
 {
+  // ID number for each call of this function (for tracking recursive calls)
+  static uint32_t callId = 0;
+
+  ++callId;
+  std::string function{"expression[" + std::to_string(callId) + "]"};
+  printFunction(function);
+
   auto primaryNode = myParentNode.top()->addChild("<primary>");
   printParse(8);
 
   myParentNode.push(primaryNode);
-  primary();
+  ExpressionRecord leftOperand;
+  primary(leftOperand);
 
   Token peekToken(myScanner.peek());
   if (peekToken.getToken() == Token::Type::PlusOp ||
@@ -81,11 +99,23 @@ void Parser::expression()
     printParse(8);
 
     myParentNode.push(addNode);
-    addOp();
+    OperatorRecord operatorRecord(Token::Type::PlusOp);
+    addOp(operatorRecord);
+
     myParentNode.push(expressionNode);
-    expression();
+    ExpressionRecord rightOperand;
+    expression(rightOperand);
+
+    theExpression = myGenerator.generateInfix(
+      leftOperand, operatorRecord, rightOperand);
+  }
+  else
+  {
+    theExpression = leftOperand;
   }
   myParentNode.pop();
+  std::cout << "Return from expression[" << callId << "]" << std::endl;
+  --callId;
 }
 
 //*****************
@@ -93,11 +123,16 @@ void Parser::expression()
 //*****************
 void Parser::exprList()
 {
+  printFunction("exprList");
+
   auto expressionNode = myParentNode.top()->addChild("<expression>");
   printParse(7);
 
   myParentNode.push(expressionNode);
-  expression();
+
+  ExpressionRecord expressionRecord;
+  expression(expressionRecord);
+  myGenerator.writeExpression(expressionRecord);
 
   Token peekToken(myScanner.peek());
   if (peekToken.getToken() == Token::Type::Comma)
@@ -116,9 +151,13 @@ void Parser::exprList()
 //**************
 // Parser::ident
 //**************
-void Parser::ident()
+void Parser::ident(ExpressionRecord &theIdentifier)
 {
+  printFunction("ident");
+
   match(Token::Type::Id);
+  theIdentifier = myGenerator.processId(
+    myScanner.getCurrentToken().getLiteral());
 
   myParentNode.top()->addChild(new ASTNode{myScanner.getCurrentToken()});
   printParse(10);
@@ -130,11 +169,15 @@ void Parser::ident()
 //***************
 void Parser::idList()
 {
+  printFunction("idList");
+
   auto identNode = myParentNode.top()->addChild("<ident>");
   printParse(6);
 
   myParentNode.push(identNode);
-  ident();
+  ExpressionRecord identifier;
+  ident(identifier);
+  myGenerator.readId(identifier);
 
   Token peekToken(myScanner.peek());
   if (peekToken.getToken() == Token::Type::Comma)
@@ -153,8 +196,10 @@ void Parser::idList()
 //****************
 // Parser::primary
 //****************
-void Parser::primary()
+void Parser::primary(ExpressionRecord &theExpression)
 {
+  printFunction("primary");
+
   Token peekToken(myScanner.peek());
   switch (peekToken.getToken())
   {
@@ -167,7 +212,7 @@ void Parser::primary()
 
       myParentNode.push(expressionNode);
       match(Token::Type::LParen);
-      expression();
+      expression(theExpression);
       match(Token::Type::RParen);
     }
     break;
@@ -177,7 +222,7 @@ void Parser::primary()
       auto identNode = myParentNode.top()->addChild("<ident>");
       printParse(9);
       myParentNode.push(identNode);
-      ident();
+      ident(theExpression);
     }
     break;
 
@@ -186,6 +231,9 @@ void Parser::primary()
       myParentNode.top()->addChild(new ASTNode(peekToken));
       printParse(11);
       match(Token::Type::IntLiteral);
+      theExpression = ExpressionRecord(
+        ExpressionRecord::Type::Literal,
+        myScanner.getCurrentToken().getLiteral());
     }
     break;
 
@@ -202,12 +250,15 @@ void Parser::primary()
 //****************
 void Parser::program()
 {
+  printFunction("program");
+
   myParentNode.top()->addChild("begin");
   auto statementListNode = myParentNode.top()->addChild("<statement list>");
   myParentNode.top()->addChild("end");
   printParse(1);
 
   myParentNode.push(statementListNode);
+  myGenerator.start();
   match(Token::Type::BeginSym);
   statementList();
   match(Token::Type::EndSym);
@@ -221,6 +272,8 @@ void Parser::program()
 //******************
 void Parser::statement()
 {
+  printFunction("statement");
+
   Token peekToken(myScanner.peek());
   switch (peekToken.getToken())
   {
@@ -233,10 +286,16 @@ void Parser::statement()
       printParse(3);
 
       myParentNode.push(identNode);
-      ident();
+      ExpressionRecord identifier;
+      ident(identifier);
+
       match(Token::Type::AssignOp);
+
       myParentNode.push(expressionNode);
-      expression();
+      ExpressionRecord expressionRecord;
+      expression(expressionRecord);
+      myGenerator.assign(identifier, expressionRecord);
+
       match(Token::Type::SemiColon);
     }
     break;
@@ -290,6 +349,8 @@ void Parser::statement()
 //**********************
 void Parser::statementList()
 {
+  printFunction("statementList");
+
   auto statementNode = myParentNode.top()->addChild("<statement>");
   printParse(2);
 
@@ -323,6 +384,8 @@ void Parser::statementList()
 //*******************
 void Parser::systemGoal()
 {
+  printFunction("systemGoal");
+
   auto programNode = myParentNode.top()->addChild("<program>");
   myParentNode.top()->addChild("$");
 
@@ -331,6 +394,7 @@ void Parser::systemGoal()
   myParentNode.push(programNode);
   program();
   match(Token::Type::EofSym);
+  myGenerator.finish();
 
   myParentNode.pop();
 }
@@ -340,11 +404,25 @@ void Parser::systemGoal()
 //**************
 void Parser::match(const Token::Type &theToken) noexcept
 {
+  Token temp(theToken, 0, 0);
+  std::string function{"match(" + temp.getTokenString() + ")"};
+  printFunction(function);
+
   Token nextToken = myScanner.nextToken();
   if (nextToken.getToken() != theToken)
   {
     myEWTracker.reportError(nextToken, 1, theToken);
   }
+}
+
+//**********************
+// Parser::printFunction
+//**********************
+void Parser::printFunction(const std::string &theFunction)
+{
+  std::cout << "Call " << std::setw(18) << std::left << theFunction
+            << "   Remaining: "
+            << myScanner.remainingSource() << std::endl;
 }
 
 //*******************
@@ -357,5 +435,6 @@ void Parser::printParse(uint32_t theProduction,
   output << std::setw(13) << theProductionName << " "
          << std::setw(2) << theProduction << " --> ";
   myASTRoot.traverse(output);
-  std::cout << output.str() << std::endl;
+  // Uncomment to print out expansion of productions
+  //std::cout << output.str() << std::endl;
 }

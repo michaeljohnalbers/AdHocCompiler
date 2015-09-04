@@ -1,6 +1,9 @@
 
 SRCS := ASTNode.cpp \
+        CodeGenerator.cpp \
         ErrorWarningTracker.cpp \
+        ExpressionRecord.cpp \
+        OperatorRecord.cpp \
         Scanner.cpp \
         Parser.cpp \
         Token.cpp \

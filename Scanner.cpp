@@ -35,6 +35,31 @@ Scanner::Scanner(const std::string &theFile) :
     throw std::runtime_error("Failed to open '" + myFile + "': " +
                              std::strerror(localErrno));
   }
+
+  // Just for Assignment 3, can remove
+  try
+  {
+    while (true)
+    {
+      Token token{readToken()};
+      myTokens.push_back(token);
+      if (token.getToken() == Token::Type::EofSym)
+      {
+        break;
+      }
+    }
+  }
+  catch (...)
+  {
+    // Let syntax errors be found by the user when calling getToken.
+  }
+  myInputStream.clear();
+  myInputStream.seekg(0);
+  myColumn = 0;
+  myLine = 1;
+  myPeekTokenPtr = nullptr;
+  // Code in nextToken to remove
+  // End of Assignment 3 code
 }
 
 //*****************
@@ -100,6 +125,7 @@ Token Scanner::nextToken()
 {
   myCurrentToken = peek();
   myPeekToken = readToken();
+  myTokens.erase(myTokens.begin()); // TODO: assignment 3 code
   return myCurrentToken;
 }
 
@@ -320,6 +346,19 @@ Token Scanner::readToken()
     }
   }
   return nextToken;
+}
+
+//*************************
+// Scanner::remainingSource
+//*************************
+std::string Scanner::remainingSource() const noexcept
+{
+  std::string remaining;
+  for (auto &token : myTokens)
+  {
+    remaining += token.getLiteral() + " ";
+  }
+  return remaining;
 }
 
 //*********************

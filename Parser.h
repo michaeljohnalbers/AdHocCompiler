@@ -12,9 +12,12 @@
 #include <stack>
 
 #include "ASTNode.h"
+#include "CodeGenerator.h"
 #include "Scanner.h"
 
 class ErrorWarningTracker;
+class ExpressionRecord;
+class OperatorRecord;
 
 /**
  * Implements a recursive descent LL(1) parser.
@@ -46,10 +49,13 @@ class Parser
    *
    * @param theScanner
    *          scanner object
+   * @param theGenerator
+   *          code generator object
    * @param theEWTracker
    *          object to track and report errors and warnings
    */
   Parser(Scanner &theScanner,
+         CodeGenerator &theGenerator,
          ErrorWarningTracker &theEWTracker);
 
   /**
@@ -85,12 +91,12 @@ class Parser
   /*
    * Production functions
    */
-  void addOp();
-  void expression();
+  void addOp(OperatorRecord &theOperator);
+  void expression(ExpressionRecord &theExpression);
   void exprList();
-  void ident();
+  void ident(ExpressionRecord &theIdentifier);
   void idList();
-  void primary();
+  void primary(ExpressionRecord &theExpression);
   void program();
   void statement();
   void statementList();
@@ -110,14 +116,25 @@ class Parser
   void match(const Token::Type &theToken) noexcept;
 
   /**
+   * Prints function being called and code remaining.
+   *
+   * @param theFunction
+   *          function name
+   */
+  void printFunction(const std::string &theFunction);
+
+  /**
    * Prints the current production number and the current set of terminals and
    * non-terminals corresponding to the parse thus far.
    */
-  void printParse(uint32_t theProduction, const char *theProductionName="")
+  void printParse(uint32_t theProduction, const char *theProductionName = "")
     const noexcept;
 
   /** Root node of abstract syntax tree. */
   ASTNode myASTRoot;
+
+  /** Code generator */
+  CodeGenerator &myGenerator;
 
   /**
    * Tracks parent nodes, top of stack is the parent for the current

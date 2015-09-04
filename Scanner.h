@@ -94,8 +94,13 @@ class Scanner
    */
   Token peek();
 
-  // ************************************************************
-  // Protected
+  /**
+   * Returns the remaining source
+   *
+   * @return the remaining source
+   */
+  std::string remainingSource() const noexcept;
+
   // ************************************************************
   protected:
 
@@ -186,12 +191,6 @@ class Scanner
   /** Last scanned token. */
   Token myCurrentToken;
 
-  /**
-   * Pointer to current token. Used to determine if peek token has
-   * been initialized.
-   */
-  Token *myCurrentTokenPtr = nullptr;
-
   /** Token literal being assembled */
   std::string myBuffer;
 
@@ -212,6 +211,9 @@ class Scanner
    * been initialized.
    */
   Token *myPeekTokenPtr = nullptr;
+
+  /** Tokens for printing remaining tokens from file for Assignment #3. */
+  std::vector<Token> myTokens;
 };
 
 #endif

@@ -7,6 +7,7 @@
 
 #include <iostream>
 
+#include "CodeGenerator.h"
 #include "ErrorWarningTracker.h"
 #include "Scanner.h"
 #include "Parser.h"
@@ -23,9 +24,10 @@ int main(int argc, char **argv)
     std::string file(argv[1]);
 
     ErrorWarningTracker ewTracker(file);
+    CodeGenerator codeGenerator(ewTracker);
 
     Scanner scanner(file);
-    Parser parser(scanner, ewTracker);
+    Parser parser(scanner, codeGenerator, ewTracker);
     parser.parse();
   }
   catch (const std::exception &exception)

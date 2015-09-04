@@ -63,7 +63,7 @@ class ErrorWarningTracker
    *
    * @return true if an error was reported, false otherwise
    */
-  bool getHasError() const noexcept;
+  bool hasError() const noexcept;
 
   /**
    * Reports a syntax error.
