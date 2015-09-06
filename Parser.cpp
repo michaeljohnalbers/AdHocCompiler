@@ -78,6 +78,19 @@ void Parser::expression(ExpressionRecord &theExpression)
 {
   // ID number for each call of this function (for tracking recursive calls)
   static uint32_t callId = 0;
+  static bool generateQuick = false;
+  static OperatorRecord oldOperator(Token::Type::PlusOp);
+  static ExpressionRecord oldLHS;
+
+  // Set to true to generate code for left associative operators. Set to false
+  // for right-associative code generation.
+  // Left associativity doesn't work 100%.
+  //   A := (B - C) + D - (E - F);
+  // gets evaluated incorrectly. The basic idea is to save some state from a
+  // previous call to expression, then on the next (recursive) call, use that
+  // state for immediate code generation, thus simulating a left-associative
+  // grammar.
+  bool leftAssociative = true;
 
   ++callId;
   std::string function{"expression[" + std::to_string(callId) + "]"};
@@ -89,6 +102,24 @@ void Parser::expression(ExpressionRecord &theExpression)
   myParentNode.push(primaryNode);
   ExpressionRecord leftOperand;
   primary(leftOperand);
+  ExpressionRecord rightOperandForPrevious(leftOperand);
+
+  if (generateQuick)
+  {
+    generateQuick = false;
+    theExpression = myGenerator.generateInfix(
+      oldLHS, oldOperator, rightOperandForPrevious);
+    oldLHS = theExpression;
+  }
+  else
+  {
+    // This is for handling 'B - (C - D)'. Don't really understand why it works.
+    theExpression = oldLHS;
+
+    // Save left operand on first pass through expression (will be used
+    // on the next call for evaluation).
+    oldLHS = leftOperand;
+  }
 
   Token peekToken(myScanner.peek());
   if (peekToken.getToken() == Token::Type::PlusOp ||
@@ -101,20 +132,38 @@ void Parser::expression(ExpressionRecord &theExpression)
     myParentNode.push(addNode);
     OperatorRecord operatorRecord(Token::Type::PlusOp);
     addOp(operatorRecord);
+    oldOperator = operatorRecord;
 
     myParentNode.push(expressionNode);
     ExpressionRecord rightOperand;
-    expression(rightOperand);
+    if (leftAssociative && myScanner.peek().getToken() != Token::Type::LParen)
+    {
+      generateQuick = true;
+      expression(theExpression);
+    }
+    else
+    {
+      expression(rightOperand);
 
-    theExpression = myGenerator.generateInfix(
-      leftOperand, operatorRecord, rightOperand);
+      theExpression = myGenerator.generateInfix(
+        leftOperand, operatorRecord, rightOperand);
+    }
   }
   else
   {
-    theExpression = leftOperand;
+    if (leftAssociative)
+    {
+      theExpression = oldLHS;
+    }
+    else
+    {
+      theExpression = leftOperand;
+    }
   }
+
   myParentNode.pop();
   std::cout << "Return from expression[" << callId << "]" << std::endl;
+
   --callId;
 }
 
