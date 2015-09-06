@@ -94,7 +94,7 @@ class Token
   /**
    * Destructor
    */
-  ~Token() = default;
+  virtual ~Token() = default;
 
   /**
    * Copy assignment operator

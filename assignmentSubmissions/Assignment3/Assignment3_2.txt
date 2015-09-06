@@ -1,0 +1,152 @@
+Call systemGoal           Remaining: begin Read ( B , C , D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call program              Remaining: begin Read ( B , C , D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call start
+Call match(BeginSym)      Remaining: begin Read ( B , C , D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call statementList        Remaining: Read ( B , C , D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call statement            Remaining: Read ( B , C , D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call match(ReadSym)       Remaining: Read ( B , C , D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call match(LParen)        Remaining: ( B , C , D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call idList               Remaining: B , C , D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call ident                Remaining: B , C , D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call match(Id)            Remaining: B , C , D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call processId
+Call checkId
+                 Declare B, Integer
+Call readId
+                 Read B, Integer
+Call match(Comma)         Remaining: , C , D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call idList               Remaining: C , D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call ident                Remaining: C , D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call match(Id)            Remaining: C , D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call processId
+Call checkId
+                 Declare C, Integer
+Call readId
+                 Read C, Integer
+Call match(Comma)         Remaining: , D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call idList               Remaining: D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call ident                Remaining: D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call match(Id)            Remaining: D ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call processId
+Call checkId
+                 Declare D, Integer
+Call readId
+                 Read D, Integer
+Call match(RParen)        Remaining: ) ; A := ( B - C ) + D - ( E - F ) ; end  
+Call match(SemiColon)     Remaining: ; A := ( B - C ) + D - ( E - F ) ; end  
+Call statementList        Remaining: A := ( B - C ) + D - ( E - F ) ; end  
+Call statement            Remaining: A := ( B - C ) + D - ( E - F ) ; end  
+Call ident                Remaining: A := ( B - C ) + D - ( E - F ) ; end  
+Call match(Id)            Remaining: A := ( B - C ) + D - ( E - F ) ; end  
+Call processId
+Call checkId
+                 Declare A, Integer
+Call match(AssignOp)      Remaining: := ( B - C ) + D - ( E - F ) ; end  
+Call expression[1]        Remaining: ( B - C ) + D - ( E - F ) ; end  
+Call primary              Remaining: ( B - C ) + D - ( E - F ) ; end  
+Call match(LParen)        Remaining: ( B - C ) + D - ( E - F ) ; end  
+Call expression[2]        Remaining: B - C ) + D - ( E - F ) ; end  
+Call primary              Remaining: B - C ) + D - ( E - F ) ; end  
+Call ident                Remaining: B - C ) + D - ( E - F ) ; end  
+Call match(Id)            Remaining: B - C ) + D - ( E - F ) ; end  
+Call processId
+Call checkId
+Call addOp                Remaining: - C ) + D - ( E - F ) ; end  
+Call match(MinusOp)       Remaining: - C ) + D - ( E - F ) ; end  
+Call processOperator
+Call expression[3]        Remaining: C ) + D - ( E - F ) ; end  
+Call primary              Remaining: C ) + D - ( E - F ) ; end  
+Call ident                Remaining: C ) + D - ( E - F ) ; end  
+Call match(Id)            Remaining: C ) + D - ( E - F ) ; end  
+Call processId
+Call checkId
+Call generateInfix
+Call getTemp
+Call checkId
+                 Declare Temp&1, Integer
+                 SUB B, C, Temp&1
+Return from expression[3]
+Return from expression[2]
+Call match(RParen)        Remaining: ) + D - ( E - F ) ; end  
+Call addOp                Remaining: + D - ( E - F ) ; end  
+Call match(PlusOp)        Remaining: + D - ( E - F ) ; end  
+Call processOperator
+Call expression[2]        Remaining: D - ( E - F ) ; end  
+Call primary              Remaining: D - ( E - F ) ; end  
+Call ident                Remaining: D - ( E - F ) ; end  
+Call match(Id)            Remaining: D - ( E - F ) ; end  
+Call processId
+Call checkId
+Call generateInfix
+Call getTemp
+Call checkId
+                 Declare Temp&2, Integer
+                 ADD Temp&1, D, Temp&2
+Call addOp                Remaining: - ( E - F ) ; end  
+Call match(MinusOp)       Remaining: - ( E - F ) ; end  
+Call processOperator
+Call expression[3]        Remaining: ( E - F ) ; end  
+Call primary              Remaining: ( E - F ) ; end  
+Call match(LParen)        Remaining: ( E - F ) ; end  
+Call expression[4]        Remaining: E - F ) ; end  
+Call primary              Remaining: E - F ) ; end  
+Call ident                Remaining: E - F ) ; end  
+Call match(Id)            Remaining: E - F ) ; end  
+Call processId
+Call checkId
+                 Declare E, Integer
+Call addOp                Remaining: - F ) ; end  
+Call match(MinusOp)       Remaining: - F ) ; end  
+Call processOperator
+Call expression[5]        Remaining: F ) ; end  
+Call primary              Remaining: F ) ; end  
+Call ident                Remaining: F ) ; end  
+Call match(Id)            Remaining: F ) ; end  
+Call processId
+Call checkId
+                 Declare F, Integer
+Call generateInfix
+Call getTemp
+Call checkId
+                 Declare Temp&3, Integer
+                 SUB E, F, Temp&3
+Return from expression[5]
+Return from expression[4]
+Call match(RParen)        Remaining: ) ; end  
+Return from expression[3]
+Call generateInfix
+Call getTemp
+Call checkId
+                 Declare Temp&4, Integer
+                 SUB D, Temp&3, Temp&4
+Return from expression[2]
+Return from expression[1]
+Call assign
+                 Store A, Temp&4
+Call match(SemiColon)     Remaining: ; end  
+Call match(EndSym)        Remaining: end  
+Call match(EofSym)        Remaining:  
+Call finish
+                 Halt
+
+Complete Code
+-------------
+Declare B, Integer
+Read B, Integer
+Declare C, Integer
+Read C, Integer
+Declare D, Integer
+Read D, Integer
+Declare A, Integer
+Declare Temp&1, Integer
+SUB B, C, Temp&1
+Declare Temp&2, Integer
+ADD Temp&1, D, Temp&2
+Declare E, Integer
+Declare F, Integer
+Declare Temp&3, Integer
+SUB E, F, Temp&3
+Declare Temp&4, Integer
+SUB D, Temp&3, Temp&4
+Store A, Temp&4
+Halt

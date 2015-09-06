@@ -13,7 +13,7 @@
 #include "Token.h"
 
 //*********************************
-// ErrorWarningTracker::getHasError
+// ErrorWarningTracker::ErrorWarningTracker
 //*********************************
 ErrorWarningTracker::ErrorWarningTracker(const std::string &theFile) :
   myFile(theFile)
@@ -21,9 +21,9 @@ ErrorWarningTracker::ErrorWarningTracker(const std::string &theFile) :
 }
 
 //*********************************
-// ErrorWarningTracker::getHasError
+// ErrorWarningTracker::hasError
 //*********************************
-bool ErrorWarningTracker::getHasError() const noexcept
+bool ErrorWarningTracker::hasError() const noexcept
 {
   return myHasError;
 }
